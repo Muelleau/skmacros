@@ -1,6 +1,9 @@
-ThisBuild / version := "0.1.0-SNAPSHOT"
-
+ThisBuild / version := "0.2.0-SNAPSHOT"
 ThisBuild / scalaVersion := "2.13.8"
+
+scalacOptions ++= Seq(
+  "-language:experimental.macros"
+)
 
 organization := "io.vigg"
 publishMavenStyle := true
@@ -12,6 +15,8 @@ resolvers += Resolver.githubPackages("OWNER")
 lazy val root = (project in file("."))
   .settings(
     name := "skmacros",
+    version := "0.2.0-SNAPSHOT",
+    crossPaths := false,
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect",
       "org.scala-lang" % "scala-compiler"
