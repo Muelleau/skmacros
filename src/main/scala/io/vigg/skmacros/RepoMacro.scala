@@ -11,6 +11,9 @@ trait RepoQueries {
   def get[T](id: Long): List[T] =
     macro RepoMacro.get[T]
 
+  def delete[T](id: Long): List[T] =
+    macro RepoMacro.get[T]
+
   def getWithFilter[T](filter: (T) => Boolean): List[T] =
     macro RepoMacro.getWithFilter[T]
 
@@ -22,6 +25,8 @@ trait RepoQueries {
   def create[T](entity: T): Unit =
     macro RepoMacro.create[T]
 
+  def getFilteredListId[A, T](idList: List[A]): List[T] =
+    macro RepoMacro.getFilteredListId[A, T]
 }
 
 class RepoMacro(val c: MacroContext) {
@@ -45,6 +50,16 @@ class RepoMacro(val c: MacroContext) {
       import ${c.prefix}._
       run(quote {
             query[$t].filter(_.id==lift($id))
+       })
+    """
+
+  def delete[T](id: Tree)(implicit
+      t: WeakTypeTag[T]
+  ): Tree =
+    q"""
+      import ${c.prefix}._
+      run(quote {
+            query[$t].filter(_.id==lift($id)).delete
        })
     """
 
@@ -75,4 +90,17 @@ class RepoMacro(val c: MacroContext) {
             query[$t].insertValue(lift($entity))
        })
      """
+
+  def getFilteredListId[A, T](idList: Tree)(implicit
+      t: WeakTypeTag[T],
+      a: WeakTypeTag[A]
+  ): Tree =
+    q"""
+      import ${c.prefix}._
+      ${idList}.flatMap(id => {
+        getWithFilterAllowFiltering[$t](entity => {
+          entity.id == lift(id)
+        })
+      })
+    """
 }
